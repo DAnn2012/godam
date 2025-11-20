@@ -673,15 +673,24 @@ export default AttachmentDetailsTwoColumn?.extend( {
 			);
 		}
 
-		// Adding functionality to replace media button
-		const replaceBtn = this.$el.find( '.compat-field-replace_media #rtgodam-replace-media-button' );
-		if ( replaceBtn.length ) {
-			replaceBtn.on( 'click', ( event ) => {
+		// Adding functionality to add media button
+		const addMediaBtn = this.$el.find( '.compat-field-replace_media #rtgodam-add-media-button' );
+		const mediaVersionDropdown = this.$el.find( '.compat-field-media_versions #rtgodam-update-media-versions' );
+		if ( addMediaBtn.length ) {
+			addMediaBtn.on( 'click', ( event ) => {
 				event.preventDefault();
 				event.stopPropagation();
-				this.replaceMedia( event );
+				this.addMediaVersion( event, this );
 			} );
 		}
+
+		mediaVersionDropdown.on( 'change', ( event ) => {
+			const selectedValue = event.currentTarget.value;
+			const postId = addMediaBtn.data( 'post-id' );
+			console.log( 'media ID:', postId );
+			console.log( 'Selected media version ID:', selectedValue );
+		} );
+
 		// Return this view.
 		return this;
 	},
@@ -714,7 +723,7 @@ export default AttachmentDetailsTwoColumn?.extend( {
 		actionsEl.append( div );
 	},
 
-	replaceMedia( elm ) {
+	addMediaVersion( elm, context ) {
 		const postId = elm.currentTarget.getAttribute( 'data-post-id' );
 		if ( ! postId ) {
 			return;
@@ -746,8 +755,11 @@ export default AttachmentDetailsTwoColumn?.extend( {
 						const json = JSON.parse( response.response );
 						if ( json && json.success ) {
 							const attachmentID = json.data.id;
+							const attachmentTitle = json.data.title;
 							const el = document.querySelector( `[data-id="${ attachmentID }"]` );
 							el.remove();
+							const mediaVersionDropdown = context.$el.find( '.compat-field-media_versions #rtgodam-update-media-versions' );
+							mediaVersionDropdown.append( `<option value="${ attachmentID }">${ attachmentTitle }</option>` );
 						}
 					} catch ( e ) {}
 				} );
